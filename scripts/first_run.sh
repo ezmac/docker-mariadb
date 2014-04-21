@@ -35,6 +35,7 @@ post_start_action() {
       GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION;
       CREATE USER '$USER'@'%' IDENTIFIED BY '$PASS';
       GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION;
+      GRANT ALL PRIVILEGES ON *.* TO 'tungsten'@'%' IDENTIFIED BY '$PASS' WITH GRANT OPTION;
 EOF
 
   rm /firstrun
