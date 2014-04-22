@@ -13,11 +13,9 @@ ENV LC_ALL     en_US.UTF-8
 
 # Install MariaDB from repository.
 RUN DEBIAN_FRONTEND=noninteractive && \
-    apt-get -y install python-software-properties && \
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
-    add-apt-repository 'deb http://mirror.jmu.edu/pub/mariadb/repo/5.5/ubuntu trusty main' && \
+    apt-get -y install python-software-properties &&\
     apt-get update && \
-    apt-get install -y mariadb-server curl which bc rsync wget java-1.7.0-openjdk ruby rpm go
+    apt-get install -y mariadb-server curl  bc rsync wget openjdk-7-jre-headless openjdk-7-jre ruby rpm golang
 
 # Install other tools.
 RUN DEBIAN_FRONTEND=noninteractive && \
@@ -26,16 +24,26 @@ RUN DEBIAN_FRONTEND=noninteractive && \
 # Decouple our data from our container.
 VOLUME ["/data"]
 
-RUN go install github.com/coreos/etcdctl
+# Install etcdctl
+RUN cd /tmp && wget -d https://github.com/coreos/etcd/releases/download/v0.3.0/etcd-v0.3.0-linux-amd64.tar.gz && \
+  tar -xf etcd-v0.3.0-linux-amd64.tar.gz  && cp etcd-v0.3.0-linux-amd64/etcdctl /usr/bin/etcdctl &&\
+  rm -rf etcd-v0*
+
 # Configure the database to use our data dir.
 RUN sed -i -e 's/^datadir\s*=.*/datadir = \/data/' /etc/mysql/my.cnf
 
 # Configure MariaDB to listen on any address.
 RUN sed -i -e 's/^bind-address/#bind-address/' /etc/mysql/my.cnf
 
+# Install Tungsten replicator
+RUN cd /tmp && wget -d https://s3.amazonaws.com/files.continuent.com/builds/nightly/tungsten-2.0-snapshots/tungsten-replicator-2.1.0-346.tar.gz&&\
+    tar -xf tungsten-replicator-2.1.0-346.tar.gz && mv tungsten-replicator-2.1.0-346 tungsten
+
 EXPOSE 3306
 ADD scripts /scripts
 RUN chmod +x /scripts/start.sh
 RUN touch /firstrun
 
-ENTRYPOINT ["/scripts/start.sh"]
+#CMD ["/scripts/start.sh"]
+CMD []
+ENTRYPOINT ["/bin/bash"]
