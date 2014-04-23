@@ -6,5 +6,5 @@ pre_start_action() {
 
 post_start_action() {
   # advertise the mysql server is up.
-  
+ : 
 }

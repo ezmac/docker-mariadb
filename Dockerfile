@@ -15,7 +15,7 @@ ENV LC_ALL     en_US.UTF-8
 RUN DEBIAN_FRONTEND=noninteractive && \
     apt-get -y install python-software-properties &&\
     apt-get update && \
-    apt-get install -y mariadb-server curl  bc rsync wget openjdk-7-jre-headless openjdk-7-jre ruby rpm golang
+    apt-get install -y mariadb-server curl  bc rsync wget openjdk-7-jre-headless openjdk-7-jre ruby rpm golang openssh-server
 
 # Install other tools.
 RUN DEBIAN_FRONTEND=noninteractive && \
@@ -36,10 +36,12 @@ RUN sed -i -e 's/^datadir\s*=.*/datadir = \/data/' /etc/mysql/my.cnf
 RUN sed -i -e 's/^bind-address/#bind-address/' /etc/mysql/my.cnf
 
 # Install Tungsten replicator
-RUN cd /tmp && wget -d https://s3.amazonaws.com/files.continuent.com/builds/nightly/tungsten-2.0-snapshots/tungsten-replicator-2.1.0-346.tar.gz&&\
-    tar -xf tungsten-replicator-2.1.0-346.tar.gz && mv tungsten-replicator-2.1.0-346 tungsten
+RUN cd /tmp && wget -d http://downloads.tungsten-replicator.org/download.php?file=tungsten-replicator-3.0.0-47.tar.gz&&\
+    tar -xf tungsten-replicator-3.0.0-47.tar.gz && mv tungsten-replicator-3.0.0-47 tungsten
 
 EXPOSE 3306
+RUN /usr/bin/mysql_install_db
+RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
 ADD scripts /scripts
 RUN chmod +x /scripts/start.sh
 RUN touch /firstrun
